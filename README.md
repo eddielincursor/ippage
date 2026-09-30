@@ -55,7 +55,7 @@ topics:
 - **日期**：畫面顯示固定 `Asia/Taipei`。
 - **字型**：頁面用系統黑體。分享圖才在建置時讀取 Noto Sans TC。
 
-推上 `main` 之後，GitHub Actions 會建置並發佈到 GitHub Pages。
+線上頁面由 `gh-pages` 分支的建置結果提供，網址是 <https://eddielincursor.github.io/ippage/>。
 
 ## 部署
 
