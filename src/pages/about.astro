@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, topics } from '../config';
+import { breadcrumbSchema, personSchema } from '../lib/seo';
+import { publicPath } from '../lib/urls';
+
+const jsonLd = [
+  personSchema(),
+  breadcrumbSchema([
+    { name: '首頁', href: '/' },
+    { name: '關於', href: '/about/' },
+  ]),
+];
+---
+
+<BaseLayout
+  title="關於"
+  description={`${site.author}是誰、這個網站寫什麼、你可以怎麼使用。`}
+  jsonLd={jsonLd}
+>
+  <section class="page-hero">
+    <p class="kicker">About</p>
+    <h1 class="page-title">大家好，我是{site.author}</h1>
+    <p class="lede">
+      這站用來整理三件事：把電腦相關的麻煩變簡單、把金融觀念寫成入門路徑，以及把好書裡用得上的部分留下來。
+    </p>
+  </section>
+
+  <div class="section about-layout">
+    <section class="about-card">
+      <h2>我是誰</h2>
+      <p>
+        我習慣把重複的事自動化，也習慣把剛學懂的東西寫成步驟。頭銜會過期，但「這件事當時為什麼這樣做」值得留著。這頁上的名字是範例，之後改 <code>src/config.ts</code>，全站署名與信箱會一起換掉。
+      </p>
+    </section>
+
+    <section class="about-card">
+      <h2>這個網站在做什麼</h2>
+      <p>
+        參考知識型個人品牌站的讀法：分類清楚、文章可回看、首頁先告訴你能從哪裡開始。目前固定三個欄位：
+      </p>
+      <ul>
+        {topics.map((topic) => (
+          <li>
+            <a href={publicPath(`/topics/${topic.slug}/`)}>{topic.name}</a>
+            ：{topic.description}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="about-card">
+      <h2>你可以怎麼用</h2>
+      <p>時間少，就從主題頁挑一篇。想系統看，從首頁的「我可以怎麼幫你」進去。想訂閱更新，用 RSS；想交流，直接寫信。</p>
+      <p>
+        聯絡：<a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>

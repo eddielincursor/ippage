@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import EssayCard from '../../components/EssayCard.astro';
+import { getTopic, topics } from '../../config';
+import { getEssaysByTopic, ogImageForTopic } from '../../lib/essays';
+import { breadcrumbSchema, collectionSchema } from '../../lib/seo';
+import { publicPath } from '../../lib/urls';
+
+export async function getStaticPaths() {
+  return topics.map((topic) => ({
+    params: { topic: topic.slug },
+  }));
+}
+
+const slug = Astro.params.topic as string;
+const topic = getTopic(slug);
+
+if (!topic) {
+  throw new Error(`Unknown topic: ${slug}`);
+}
+
+const essays = await getEssaysByTopic(topic.slug);
+const crumbs = [
+  { name: '首頁', href: '/' },
+  { name: '主題', href: '/topics/' },
+];
+
+const jsonLd = [
+  collectionSchema(topic, essays),
+  breadcrumbSchema([...crumbs, { name: topic.name, href: `/topics/${topic.slug}/` }]),
+];
+---
+
+<BaseLayout
+  title={topic.name}
+  description={topic.description}
+  image={ogImageForTopic(topic.slug)}
+  jsonLd={jsonLd}
+>
+  <div class="page-hero">
+    <Breadcrumbs crumbs={crumbs} current={topic.name} />
+    <p class="kicker" style={`color: ${topic.color}`}>主題索引</p>
+    <h1 class="page-title">{topic.name}</h1>
+    <p class="lede">{topic.intro}</p>
+  </div>
+
+  <section class="section" aria-labelledby="questions-heading">
+    <div class="section-head">
+      <h2 id="questions-heading">這個分類想回答的問題</h2>
+    </div>
+    <ul class="question-list" style={`--topic: ${topic.color}`}>
+      {topic.questions.map((question) => <li>{question}</li>)}
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="posts-heading">
+    <div class="section-head">
+      <h2 id="posts-heading">{topic.name}的文章（{essays.length}）</h2>
+      <a href={publicPath('/essays/')}>全部文章</a>
+    </div>
+    {essays.length === 0 ? (
+      <p class="empty">這個主題還沒有文章。</p>
+    ) : (
+      <div class="post-stack">
+        {essays.map((essay) => <EssayCard essay={essay} heading="h3" />)}
+      </div>
+    )}
+  </section>
+</BaseLayout>

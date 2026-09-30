@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EssayCard from '../../components/EssayCard.astro';
+import { getEssays } from '../../lib/essays';
+
+const essays = await getEssays();
+---
+
+<BaseLayout title="全部文章" description="程式設計、金融與好書分享的全部筆記。">
+  <section class="page-hero">
+    <p class="kicker">Articles</p>
+    <h1 class="page-title">全部文章</h1>
+    <p class="lede">依時間排列。也可以從上方分類進單一主題。</p>
+  </section>
+
+  <section class="section">
+    {essays.length === 0 ? (
+      <p class="empty">還沒有文章。把 Markdown 放到 src/content/essays/ 即可。</p>
+    ) : (
+      <div class="post-grid">
+        {essays.map((essay) => <EssayCard essay={essay} />)}
+      </div>
+    )}
+  </section>
+</BaseLayout>

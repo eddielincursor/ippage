@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { publicPath } from '../lib/urls';
+---
+
+<BaseLayout title="找不到頁面" description="這個網址沒有對應的頁面。">
+  <section class="page-hero">
+    <p class="kicker">404</p>
+    <h1 class="page-title">這頁不存在</h1>
+    <p class="lede">連結可能打錯了，或文章已經換了網址。</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href={publicPath('/')}>回首頁</a>
+      <a class="btn btn-ghost" href={publicPath('/essays/')}>看全部文章</a>
+    </div>
+  </section>
+</BaseLayout>

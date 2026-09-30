@@ -1,0 +1,23 @@
+---
+import type { Topic } from '../config';
+import { publicPath } from '../lib/urls';
+
+interface Props {
+  topic: Topic;
+  count?: number;
+  heading?: 'h2' | 'h3';
+  help?: boolean;
+}
+
+const { topic, count, heading = 'h2', help = false } = Astro.props;
+const Heading = heading;
+---
+
+<a class="topic-card" href={publicPath(`/topics/${topic.slug}/`)}>
+  <div class="topic-mark" style={`--topic: ${topic.color}`} aria-hidden="true">{topic.mark}</div>
+  <div>
+    <Heading>{topic.name}</Heading>
+    <p>{help ? topic.help : topic.description}</p>
+    {count !== undefined && <p class="topic-count">{count} 篇文章</p>}
+  </div>
+</a>

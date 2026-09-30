@@ -1,0 +1,33 @@
+---
+import { essayTopics, essayUrl, formatDate, type Essay } from '../lib/essays';
+
+interface Props {
+  essay: Essay;
+  heading?: 'h2' | 'h3';
+}
+
+const { essay, heading = 'h2' } = Astro.props;
+const Heading = heading;
+const topics = essayTopics(essay);
+const primary = topics[0];
+
+if (!primary) {
+  throw new Error(`Essay ${essay.id} has no topics`);
+}
+---
+
+<a class="post-card" href={essayUrl(essay)}>
+  <div class="post-thumb" style={`--topic: ${primary.color}`} aria-hidden="true">
+    <span>{primary.mark}</span>
+  </div>
+  <div class="post-body">
+    <div class="meta">
+      {topics.map((topic) => (
+        <span class="badge" style={`--topic: ${topic.color}`}>{topic.name}</span>
+      ))}
+      <time datetime={essay.data.pubDate.toISOString()}>{formatDate(essay.data.pubDate)}</time>
+    </div>
+    <Heading>{essay.data.title}</Heading>
+    <p class="summary">{essay.data.description}</p>
+  </div>
+</a>

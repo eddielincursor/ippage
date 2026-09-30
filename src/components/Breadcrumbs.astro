@@ -1,0 +1,19 @@
+---
+import { publicPath } from '../lib/urls';
+
+interface Props {
+  crumbs: { name: string; href: string }[];
+  current: string;
+}
+
+const { crumbs, current } = Astro.props;
+---
+
+<nav class="breadcrumbs" aria-label="麵包屑">
+  <ol>
+    {crumbs.map((crumb) => (
+      <li><a href={publicPath(crumb.href)}>{crumb.name}</a></li>
+    ))}
+    <li aria-current="page">{current}</li>
+  </ol>
+</nav>

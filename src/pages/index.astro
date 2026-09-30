@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EssayCard from '../components/EssayCard.astro';
+import TopicCard from '../components/TopicCard.astro';
+import { site, topics } from '../config';
+import { getEssays, getEssaysByTopic } from '../lib/essays';
+import { personSchema, websiteSchema } from '../lib/seo';
+import { publicPath } from '../lib/urls';
+
+const latest = (await getEssays()).slice(0, 6);
+const topicCounts = await Promise.all(
+  topics.map(async (topic) => ({
+    topic,
+    count: (await getEssaysByTopic(topic.slug)).length,
+  })),
+);
+---
+
+<BaseLayout jsonLd={[websiteSchema(), personSchema()]}>
+  <section class="hero-home">
+    <p class="kicker">{site.author} 的筆記站</p>
+    <h1>{site.tagline}</h1>
+    <p class="lede">
+      我把正在學的程式、正在用的理財觀念，以及讀完、真正改變過做法的書，收成可以回看的分類筆記。風格接近知識型個人站：先讓你找到主題，再往下讀長文。
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href={publicPath('/essays/')}>看最新文章</a>
+      <a class="btn btn-ghost" href={publicPath('/about/')}>關於我</a>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="help-heading">
+    <div class="section-head">
+      <h2 id="help-heading">我可以怎麼幫你？</h2>
+    </div>
+    <div class="help-grid">
+      {topicCounts.map(({ topic, count }) => (
+        <TopicCard topic={topic} count={count} heading="h3" help />
+      ))}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="latest-heading">
+    <div class="section-head">
+      <h2 id="latest-heading">最新文章</h2>
+      <a href={publicPath('/essays/')}>全部文章</a>
+    </div>
+    <div class="post-grid">
+      {latest.map((essay) => <EssayCard essay={essay} heading="h3" />)}
+    </div>
+  </section>
+</BaseLayout>

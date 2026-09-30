@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicCard from '../../components/TopicCard.astro';
+import { topics } from '../../config';
+import { getEssaysByTopic } from '../../lib/essays';
+
+const topicCounts = await Promise.all(
+  topics.map(async (topic) => ({
+    topic,
+    count: (await getEssaysByTopic(topic.slug)).length,
+  })),
+);
+---
+
+<BaseLayout title="主題總覽" description="程式設計、金融與好書分享的分類入口。">
+  <section class="page-hero">
+    <p class="kicker">Topics</p>
+    <h1 class="page-title">主題總覽</h1>
+    <p class="lede">先選一個你現在想解決的問題，再往下讀文章。</p>
+  </section>
+
+  <section class="section">
+    <div class="topic-grid">
+      {topicCounts.map(({ topic, count }) => (
+        <TopicCard topic={topic} count={count} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

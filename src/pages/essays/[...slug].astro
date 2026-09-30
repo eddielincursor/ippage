@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import EssayCard from '../../components/EssayCard.astro';
+import {
+  essayTopics,
+  essayUrl,
+  formatDate,
+  getAdjacentEssays,
+  getRelatedEssays,
+  ogImageForEssay,
+  readingMinutes,
+  type Essay,
+} from '../../lib/essays';
+import { blogPostingSchema, breadcrumbSchema } from '../../lib/seo';
+import { publicPath } from '../../lib/urls';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const essays = await getCollection('essays');
+  return essays.map((essay) => ({
+    params: { slug: essay.id },
+    props: { essay },
+  }));
+}
+
+interface Props {
+  essay: Essay;
+}
+
+const { essay } = Astro.props;
+const { Content, headings } = await render(essay);
+const topics = essayTopics(essay);
+const primary = topics[0];
+const related = await getRelatedEssays(essay);
+const { newer, older } = await getAdjacentEssays(essay);
+const minutes = readingMinutes(essay);
+
+const crumbs = [
+  { name: '首頁', href: '/' },
+  ...(primary ? [{ name: primary.name, href: `/topics/${primary.slug}/` }] : []),
+];
+
+const jsonLd = [
+  blogPostingSchema(essay),
+  breadcrumbSchema([...crumbs, { name: essay.data.title, href: `/essays/${essay.id}/` }]),
+];
+---
+
+<BaseLayout
+  title={essay.data.title}
+  description={essay.data.description}
+  image={ogImageForEssay(essay)}
+  type="article"
+  publishedTime={essay.data.pubDate}
+  modifiedTime={essay.data.updatedDate ?? essay.data.pubDate}
+  jsonLd={jsonLd}
+>
+  <div class="article-wrap">
+    <Breadcrumbs crumbs={crumbs} current={essay.data.title} />
+    <article class="prose">
+      <div class="meta">
+        {topics.map((topic) => (
+          <a class="badge" href={publicPath(`/topics/${topic.slug}/`)} style={`--topic: ${topic.color}`}>
+            {topic.name}
+          </a>
+        ))}
+        <time datetime={essay.data.pubDate.toISOString()}>{formatDate(essay.data.pubDate)}</time>
+        {essay.data.updatedDate && (
+          <span>最後更新 {formatDate(essay.data.updatedDate)}</span>
+        )}
+        <span>約 {minutes} 分鐘</span>
+      </div>
+      <h1>{essay.data.title}</h1>
+      <p class="lead">{essay.data.description}</p>
+      <TableOfContents headings={headings} />
+      <Content />
+    </article>
+
+    {related.length > 0 && (
+      <section class="section" aria-labelledby="related-heading">
+        <div class="section-head">
+          <h2 id="related-heading">相關文章</h2>
+        </div>
+        <div class="post-stack">
+          {related.map((item) => <EssayCard essay={item} heading="h3" />)}
+        </div>
+      </section>
+    )}
+
+    {(newer || older) && (
+      <nav class="pager" aria-label="上下篇">
+        {older ? (
+          <a class="pager-link" href={essayUrl(older)}>
+            <span>上一篇</span>
+            {older.data.title}
+          </a>
+        ) : <span />}
+        {newer && (
+          <a class="pager-link pager-next" href={essayUrl(newer)}>
+            <span>下一篇</span>
+            {newer.data.title}
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</BaseLayout>
